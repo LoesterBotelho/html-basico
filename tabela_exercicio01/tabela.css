@@ -1,0 +1,91 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  padding: 20px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.tabela-brasileirao {
+  width: 100%;
+  max-width: 600px;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  font-size: 14px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Cabeçalho */
+.tabela-brasileirao th {
+  background-color: #4caf50;
+  color: #ffffff;
+  padding: 10px;
+  text-align: center;
+}
+
+.tabela-brasileirao th.col-time {
+  text-align: left;
+}
+
+.tabela-brasileirao td {
+  padding: 8px 10px;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tabela-brasileirao td.col-time {
+  text-align: left;
+  font-weight: 500;
+}
+
+.col-pts {
+  font-weight: bold;
+}
+
+/* Linhas Alternadas */
+.tabela-brasileirao tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.destaque-azul {
+  background-color: #d0e8f5;
+}
+
+.destaque-laranja {
+  background-color: #f7a474;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.destaque-laranja-escuro {
+  background-color: #e65100;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.apr-alta {
+  background-color: #66bb6a;
+  color: #ffffff;
+}
+
+.apr-media {
+  background-color: #c8e6c9;
+}
+
+.apr-baixa {
+  background-color: #ffcdd2;
+}
+
+.apr-muito-baixa {
+  background-color: #ef5350;
+  color: #ffffff;
+}
