@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distribuição das Horas</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .title {
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1rem;
+    }
+
+    .item-title {
+      color: #e5e5e5;
+    }
+
+    .item-value {
+      color: #ffffff;
+      font-weight: 400;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background-color: #1a1a1a;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+
+    .fill-logica {
+      width: 33.33%;
+      background-color: #3b82f6;
+    }
+
+    .fill-poo {
+      width: 16.66%;
+      background-color: #10b981;
+    }
+
+    .fill-sql {
+      width: 16.66%;
+      background-color: #d97706;
+    }
+
+    .fill-web {
+      width: 12.5%;
+      background-color: #a855f7;
+    }
+
+    .fill-algoritmos {
+      width: 8.33%;
+      background-color: #e07a5f;
+    }
+
+    .fill-simulados {
+      width: 12.5%;
+      background-color: #64748b;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2 class="title">Distribuição das 120 horas</h2>
+
+    <div class="item">
+      <div class="item-header">
+        <span class="item-title">Lógica de programação</span>
+        <span class="item-value">40h</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill fill-logica"></div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-header">
+        <span class="item-title">Programação Orientada a Objetos</span>
+        <span class="item-value">20h</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill fill-poo"></div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-header">
+        <span class="item-title">Banco de Dados e SQL</span>
+        <span class="item-value">20h</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill fill-sql"></div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-header">
+        <span class="item-title">Desenvolvimento Web</span>
+        <span class="item-value">15h</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill fill-web"></div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-header">
+        <span class="item-title">Algoritmos e resolução de problemas</span>
+        <span class="item-value">10h</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill fill-algoritmos"></div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-header">
+        <span class="item-title">Simulados e avaliação</span>
+        <span class="item-value">15h</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill fill-simulados"></div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
