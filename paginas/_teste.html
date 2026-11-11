@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MNIST - Neural Network Pruning & Fine-Tuning</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+        :root {
+            --background: #050505;
+            --card: #000000;
+            --border: #252525;
+            --text: #ffffff;
+            --muted: #888888;
+            --blue: #3b82f6;
+            --orange: #ea580c;
+            --green: #16a34a;
+            --green-accent: #10b981;
+            --red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont,
+                "Segoe UI", Roboto, Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        .page-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 45px 20px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: var(--muted);
+            margin-bottom: 35px;
+        }
+
+        .custom-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            height: 100%;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        /* Dataset */
+
+        .data-row {
+            margin-bottom: 22px;
+        }
+
+        .data-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: .95rem;
+        }
+
+        .data-value {
+            color: #e0e0e0;
+        }
+
+        .progress {
+            height: 10px;
+            background: #1a1a1a;
+            border-radius: 5px;
+        }
+
+        .progress-bar {
+            border-radius: 5px;
+        }
+
+        .bg-training {
+            background: var(--blue);
+        }
+
+        .bg-validation {
+            background: var(--orange);
+        }
+
+        .bg-testing {
+            background: var(--green);
+        }
+
+        .dataset-footer {
+            color: var(--muted);
+            font-size: .85rem;
+            margin-top: 25px;
+        }
+
+        /* Summary */
+
+        .metric-label {
+            color: var(--muted);
+            font-size: .85rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .metric-description {
+            color: var(--muted);
+            font-size: .8rem;
+        }
+
+        /* Sparsity Detail Card */
+        .sparsity-percentage {
+            color: var(--green-accent);
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .sparsity-title {
+            color: var(--text);
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+
+        .progress-sparsity {
+            height: 10px;
+            background: #1a1a1a;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar-sparsity {
+            background-color: var(--green-accent);
+        }
+
+        .sparsity-subtext {
+            font-size: 0.85rem;
+        }
+
+        .metric-number {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Results table */
+
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: #ffffff;
+            --bs-table-border-color: #252525;
+            vertical-align: middle;
+        }
+
+        .table thead th {
+            color: var(--muted);
+            font-size: .8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .table tbody td {
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+
+        .original-row {
+            background: #10251b;
+        }
+
+        .loss-good {
+            color: #22c55e;
+        }
+
+        .loss-warning {
+            color: #f59e0b;
+        }
+
+        .loss-danger {
+            color: #ef4444;
+        }
+
+        /* Accuracy chart */
+
+        .accuracy-row {
+            display: grid;
+            grid-template-columns: 65px 1fr 75px;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 19px;
+        }
+
+        .accuracy-label {
+            font-size: .9rem;
+        }
+
+        .accuracy-value {
+            text-align: right;
+            font-size: .85rem;
+            font-weight: 600;
+        }
+
+        .accuracy-bar {
+            height: 12px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .accuracy-fill {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #2563eb, #38bdf8);
+        }
+
+        .accuracy-fill.low {
+            background: linear-gradient(90deg, #ea580c, #ef4444);
+        }
+
+        .insight {
+            background: #101a2b;
+            border-left: 3px solid var(--blue);
+            border-radius: 5px;
+            padding: 16px;
+            color: #cbd5e1;
+            font-size: .9rem;
+            line-height: 1.6;
+            margin-top: 25px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            color: var(--muted);
+            text-align: center;
+            font-size: .8rem;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 576px) {
+            .page-container {
+                padding: 25px 14px;
+            }
+
+            .page-title {
+                font-size: 1.6rem;
+            }
+
+            .custom-card {
+                padding: 18px;
+            }
+
+            .accuracy-row {
+                grid-template-columns: 48px 1fr 65px;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="page-container">
+
+    <!-- Header -->
+
+    <header class="mb-4">
+        <h1 class="page-title">
+            Neural Network Pruning & Fine-Tuning
+        </h1>
+
+        <p class="page-subtitle">
+            MNIST Dataset · Model Compression · Fine-Tuning Optimization
+        </p>
+    </header>
+
+    <!-- Dataset and Model Information -->
+
+    <section class="row g-4 mb-4">
+
+        <!-- Dataset Card -->
+
+        <div class="col-lg-6">
+
+            <div class="custom-card">
+
+                <h2 class="card-title">
+                    Your MNIST dataset
+                </h2>
+
+                <div class="data-row">
+
+                    <div class="data-header">
+                        <span>Training</span>
+                        <span class="data-value">50,000</span>
+                    </div>
+
+                    <div class="progress">
+                        <div class="progress-bar bg-training"
+                             style="width: 71.43%">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="data-row">
+
+                    <div class="data-header">
+                        <span>Validation</span>
+                        <span class="data-value">10,000</span>
+                    </div>
+
+                    <div class="progress">
+                        <div class="progress-bar bg-validation"
+                             style="width: 14.285%">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="data-row">
+
+                    <div class="data-header">
+                        <span>Testing</span>
+                        <span class="data-value">10,000</span>
+                    </div>
+
+                    <div class="progress">
+                        <div class="progress-bar bg-testing"
+                             style="width: 14.285%">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="dataset-footer">
+                    70,000 images in total.
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Model Information -->
+
+        <div class="col-lg-6">
+
+            <div class="custom-card">
+
+                <h2 class="card-title">
+                    Neural Network Architecture
+                </h2>
+
+                <div class="mb-4">
+
+                    <div class="metric-label">
+                        Original network
+                    </div>
+
+                    <div class="metric-value">
+                        784 → 512 → 256 → 10
+                    </div>
+
+                </div>
+
+                <div class="mb-4">
+
+                    <div class="metric-label">
+                        Input layer
+                    </div>
+
+                    <div class="metric-value">
+                        784
+                    </div>
+
+                    <div class="metric-description">
+                        28 × 28 MNIST image pixels
+                    </div>
+
+                </div>
+
+                <div>
+
+                    <div class="metric-label">
+                        Output layer
+                    </div>
+
+                    <div class="metric-value">
+                        10
+                    </div>
+
+                    <div class="metric-description">
+                        Digit classification: 0–9
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- Summary Metrics -->
+
+    <section class="row g-3 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="custom-card">
+
+                <div class="metric-label">
+                    Baseline accuracy
+                </div>
+
+                <div class="metric-value">
+                    97.60%
+                </div>
+
+                <div class="metric-description">
+                    Normal trained model
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="custom-card">
+
+                <div class="metric-label">
+                    Best optimal sparsity
+                </div>
+
+                <div class="metric-value">
+                    77.0%
+                </div>
+
+                <div class="metric-description">
+                    With 3 epochs Fine-Tuning
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="custom-card">
+
+                <div class="metric-label">
+                    Post-FT Accuracy
+                </div>
+
+                <div class="metric-value" style="color: var(--green-accent);">
+                    97.84%
+                </div>
+
+                <div class="metric-description">
+                    Superior to baseline
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- Network Sparsity Detail Card (Atualizado para 77%) -->
+    <section class="custom-card mb-4">
+        <div class="sparsity-percentage mb-1">77.0%</div>
+        <div class="sparsity-title mb-3">Optimal network sparsity (Post Fine-Tuning)</div>
+
+        <div class="progress progress-sparsity mb-2">
+            <div class="progress-bar progress-bar-sparsity" role="progressbar" style="width: 77%;" aria-valuenow="77" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+
+        <div class="d-flex justify-content-between sparsity-subtext mb-4">
+            <span style="color: var(--green-accent);">77% zero weights</span>
+            <span style="color: var(--muted);">23% remaining</span>
+        </div>
+
+        <hr style="border-color: var(--border);" class="my-4">
+
+        <div class="row g-4 text-center text-md-start">
+            <div class="col-6 col-md-3">
+                <div class="metric-number">234,752</div>
+                <div class="metric-label">Total weights</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="metric-number">180,759</div>
+                <div class="metric-label">Zero weights</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="metric-number">53,993</div>
+                <div class="metric-label">Remaining weights</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="metric-number" style="color: var(--green-accent);">97.84%</div>
+                <div class="metric-label">Fine-Tuned accuracy</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pruning Results (Fase 2 - Fine Tuning Detalhado) -->
+
+    <section class="custom-card mb-4">
+
+        <h2 class="section-title">
+            Fine-Tuning Results (Before vs. After)
+        </h2>
+
+        <p class="text-secondary small mb-4">
+            Detailed validation accuracy comparison across fine search rates (70% to 81%).
+        </p>
+
+        <div class="table-responsive">
+
+            <table class="table">
+
+                <thead>
+
+                    <tr>
+                        <th>Sparsity Rate</th>
+                        <th>Before FT (Only Pruning)</th>
+                        <th>After FT (3 Epochs)</th>
+                        <th>Improvement</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>70.0%</td>
+                        <td>96.30%</td>
+                        <td><strong>97.63%</strong></td>
+                        <td class="loss-good">+1.33 pp</td>
+                    </tr>
+
+                    <tr>
+                        <td>71.0%</td>
+                        <td>96.23%</td>
+                        <td><strong>97.49%</strong></td>
+                        <td class="loss-good">+1.26 pp</td>
+                    </tr>
+
+                    <tr>
+                        <td>72.0%</td>
+                        <td>96.18%</td>
+                        <td><strong>97.02%</strong></td>
+                        <td class="loss-good">+0.84 pp</td>
+                    </tr>
+
+                    <tr>
+                        <td>73.0%</td>
+                        <td>95.97%</td>
+                        <td><strong>97.66%</strong></td>
+                        <td class="loss-good">+1.69 pp</td>
+                    </tr>
+
+                    <tr>
+                        <td>74.0%</td>
+                        <td>95.51%</td>
+                        <td><strong>97.80%</strong></td>
+                        <td class="loss-good">+2.29 pp</td>
+                    </tr>
+
+                    <tr>
+                        <td>75.0%</td>
+                        <td>95.19%</td>
+                        <td><strong>97.41%</strong></td>
+                        <td class="loss-good">+2.22 pp</td>
+                    </tr>
+
+                    <tr>
+                        <td>76.0%</td>
+                        <td>94.88%</td>
+                        <td><strong>97.59%</strong></td>
+                        <td class="loss-good">+2.71 pp</td>
+                    </tr>
+
+                    <tr class="original-row">
+                        <td><strong>77.0% (Optimal)</strong></td>
+                        <td>94.50%</td>
+                        <td><strong style="color: #22c55e;">97.84%</strong></td>
+                        <td class="loss-good">+3.34 pp</td>
+                    </tr>
+
+                    <tr>
+                        <td>78.0%</td>
+                        <td>94.16%</td>
+                        <td><strong>97.74%</strong></td>
+                        <td class="loss-good">+3.58 pp</td>
+                    </tr>
+
+                    <tr>
+                        <td>79.0%</td>
+                        <td>93.66%</td>
+                        <td><strong>97.66%</strong></td>
+                        <td class="loss-good">+4.00 pp</td>
+                    </tr>
+
+                    <tr>
+                        <td>80.0%</td>
+                        <td>92.88%</td>
+                        <td><strong>97.73%</strong></td>
+                        <td class="loss-good">+4.85 pp</td>
+                    </tr>
+
+                    <tr>
+                        <td>81.0%</td>
+                        <td>91.91%</td>
+                        <td><strong>97.65%</strong></td>
+                        <td class="loss-good">+5.74 pp</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- Accuracy Chart -->
+
+    <section class="custom-card">
+
+        <h2 class="section-title">
+            Post-Fine-Tuning Accuracy by Sparsity
+        </h2>
+
+        <p class="text-secondary small mb-4">
+            Model validation accuracy distribution across fine-tuned sparsity thresholds.
+        </p>
+
+        <div class="accuracy-row">
+            <span class="accuracy-label">70%</span>
+            <div class="accuracy-bar">
+                <div class="accuracy-fill" style="width:97.63%"></div>
+            </div>
+            <span class="accuracy-value">97.63%</span>
+        </div>
+
+        <div class="accuracy-row">
+            <span class="accuracy-label">72%</span>
+            <div class="accuracy-bar">
+                <div class="accuracy-fill" style="width:97.02%"></div>
+            </div>
+            <span class="accuracy-value">97.02%</span>
+        </div>
+
+        <div class="accuracy-row">
+            <span class="accuracy-label">74%</span>
+            <div class="accuracy-bar">
+                <div class="accuracy-fill" style="width:97.80%"></div>
+            </div>
+            <span class="accuracy-value">97.80%</span>
+        </div>
+
+        <div class="accuracy-row">
+            <span class="accuracy-label">76%</span>
+            <div class="accuracy-bar">
+                <div class="accuracy-fill" style="width:97.59%"></div>
+            </div>
+            <span class="accuracy-value">97.59%</span>
+        </div>
+
+        <div class="accuracy-row">
+            <span class="accuracy-label" style="color: var(--green-accent); font-weight: bold;">77%</span>
+            <div class="accuracy-bar">
+                <div class="accuracy-fill" style="width:97.84%; background: linear-gradient(90deg, #059669, #34d399);"></div>
+            </div>
+            <span class="accuracy-value" style="color: var(--green-accent);">97.84%</span>
+        </div>
+
+        <div class="accuracy-row">
+            <span class="accuracy-label">78%</span>
+            <div class="accuracy-bar">
+                <div class="accuracy-fill" style="width:97.74%"></div>
+            </div>
+            <span class="accuracy-value">97.74%</span>
+        </div>
+
+        <div class="accuracy-row">
+            <span class="accuracy-label">80%</span>
+            <div class="accuracy-bar">
+                <div class="accuracy-fill" style="width:97.73%"></div>
+            </div>
+            <span class="accuracy-value">97.73%</span>
+        </div>
+
+        <div class="accuracy-row">
+            <span class="accuracy-label">81%</span>
+            <div class="accuracy-bar">
+                <div class="accuracy-fill" style="width:97.65%"></div>
+            </div>
+            <span class="accuracy-value">97.65%</span>
+        </div>
+
+        <div class="insight">
+
+            <strong>Key observation:</strong>
+
+            Applying fine-tuning (3 epochs) recovers and stabilizes the network performance drastically. 
+
+            Even at higher sparsity ratios like 77% to 80%, the model surpasses baseline performance, achieving an optimal peak accuracy of **97.84%** at **77.0% sparsity**.
+
+        </div>
+
+    </section>
+
+    <footer>
+        MNIST Dataset · Neural Network Pruning & Fine-Tuning Optimization Experiment
+    </footer>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
